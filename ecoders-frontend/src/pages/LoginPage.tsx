@@ -203,8 +203,6 @@ function LoginPage() {
     const accessToken = urlSearchParams.get('accessToken');
     const refreshToken = urlSearchParams.get('refreshToken');
 
-    console.log(accessToken);
-    console.log(refreshToken);
     if (accessToken && refreshToken) {
       try {
         // 로컬 스토리지에 토큰 저장

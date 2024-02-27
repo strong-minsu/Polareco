@@ -3,6 +3,7 @@ import modalReducer from '../slice/modalSlice';
 import loginSlice from '../slice/loginSlice';
 import userSlice from '../slice/userSlice';
 import postSlice from '../slice/postSlice';
+import googleSlice from '../slice/googleSlice';
 
 // configureStore를 사용하여 스토어를 설정
 const store = configureStore({
@@ -12,6 +13,7 @@ const store = configureStore({
     login: loginSlice,
     user: userSlice,
     post: postSlice,
+    google: googleSlice,
   },
 });
 
