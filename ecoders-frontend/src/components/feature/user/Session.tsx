@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 // import { RootState } from '../../../redux/store/store';
 import axios from 'axios';
 import { login, logout } from '../../../redux/slice/loginSlice';
 import { setEmail, setId, setUsername, setProfileImg } from '../../../redux/slice/userSlice';
+import { googlelogin, googlelogout } from '../../../redux/slice/googleSlice';
+import { RootState } from '../../../redux/store/store';
 
 //vite로 만든 프로젝트에서 환경변수 사용하기
 const APIURL = import.meta.env.VITE_API_URL;
@@ -57,6 +59,7 @@ export async function tokenExpirationHandler(fun: Function) {
 
 function Session() {
   const dispatch = useDispatch();
+  const email = useSelector((state: RootState) => state.user.email);
   //로그인 상태 받아옴
   //유저 정보 받아오는 함수
   async function getUser() {
@@ -96,12 +99,46 @@ function Session() {
     }
   }
 
+  async function getUserGoogle() {
+    const accessToken = localStorage.getItem('accessToken');
+    try {
+      // setIsLoading(true);
+      const response = await axios.get(`${APIURL}/check/google`, {
+        params: {
+          email: email,
+        },
+        headers: {
+          Authorization: accessToken,
+        },
+      });
+      // accessToken으로 유저 정보 불러오기 성공 (user 정보 저장)
+      if (response.status === 200) {
+        //이미지 있는 경우만 불러옴
+        console.log(response);
+        console.log(response.data);
+        if (response.data.googleMember) {
+          dispatch(googlelogin());
+        }
+        console.log('User information has been received successfully.');
+      }
+    } catch (err: any) {
+      //accessToken 만료일 경우
+      if (err.response.status === 403) {
+        console.log('GoogleLoginCheck Error');
+        tokenExpirationHandler(getUserGoogle);
+      } else {
+        dispatch(googlelogout());
+      }
+    }
+  }
   useEffect(() => {
     //토큰 유무로 로그인 상태 저장
     if (localStorage.getItem('accessToken') && localStorage.getItem('refreshToken')) {
       getUser();
+      getUserGoogle();
     } else {
       dispatch(logout());
+      dispatch(googlelogout());
       // setIsLoading(false);
     }
   });
